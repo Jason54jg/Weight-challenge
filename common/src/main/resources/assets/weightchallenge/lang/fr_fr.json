@@ -1,0 +1,7 @@
+{
+  "weightchallenge.hud.weight": "Poids : %s kg | Objectif : %s kg",
+  "weightchallenge.command.set": "Poids de %s fixé à %s kg",
+  "weightchallenge.command.add": "Poids de %s : %s kg",
+  "weightchallenge.command.reset": "Poids de %s réinitialisé.",
+  "weightchallenge.command.get": "%s : %s kg (objectif %s kg)"
+}

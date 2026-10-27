@@ -1,4 +1,23 @@
 pluginManagement {
+    def baseProps = new Properties()
+    file('gradle.properties').withInputStream { baseProps.load(it) }
+
+    def mcVersion = settings.startParameter.projectProperties.get('mcVersion') ?: baseProps.getProperty('mcVersion', '1.21.11')
+    def versionProps = new Properties()
+    versionProps.putAll(baseProps)
+    def versionFile = file("versions/${mcVersion}.properties")
+    if (versionFile.exists()) {
+        versionFile.withInputStream { versionProps.load(it) }
+    }
+    def loomPlugin = versionProps.getProperty('loom_plugin', 'fabric-loom')
+    def loomVersion = versionProps.getProperty('loom_version', '1.13-SNAPSHOT')
+    def moddevVersion = versionProps.getProperty('moddev_version', '2.0.123')
+    def unobfuscated = loomPlugin == 'net.fabricmc.fabric-loom'
+
+    settings.ext.mcVersion = mcVersion
+    settings.ext.loomPlugin = loomPlugin
+    settings.ext.unobfuscated = unobfuscated
+
     repositories {
         gradlePluginPortal()
         mavenCentral()
@@ -10,8 +29,7 @@ pluginManagement {
                 }
             }
             filter {
-                includeGroup('net.fabricmc')
-                includeGroup('net.fabricmc.unpick')
+                includeGroupAndSubgroups('net.fabricmc')
                 includeGroup('fabric-loom')
             }
         }
@@ -38,11 +56,21 @@ pluginManagement {
             }
         }
     }
+    plugins {
+        // Both Loom flavours available; fabric/build.gradle applies the one for this mcVersion
+        id 'fabric-loom' version "${unobfuscated ? '1.13-SNAPSHOT' : loomVersion}"
+        id 'net.fabricmc.fabric-loom' version "${unobfuscated ? loomVersion : '1.18.1'}"
+        id 'net.neoforged.moddev' version "${moddevVersion}"
+    }
 }
 
 plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
 }
+
+gradle.ext.mcVersion = settings.ext.mcVersion
+gradle.ext.loomPlugin = settings.ext.loomPlugin
+gradle.ext.unobfuscated = settings.ext.unobfuscated
 
 // This should match the folder name of the project, or else IDEA may complain (see https://youtrack.jetbrains.com/issue/IDEA-317606)
 rootProject.name = 'weight-challenge'

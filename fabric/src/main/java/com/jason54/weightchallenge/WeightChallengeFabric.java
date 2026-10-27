@@ -11,7 +11,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
@@ -23,7 +22,7 @@ public class WeightChallengeFabric implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        PayloadTypeRegistry.playS2C().register(WeightSyncPayload.TYPE, WeightSyncPayload.STREAM_CODEC);
+        FabricPayloadCompat.registerClientboundPlay(WeightSyncPayload.TYPE, WeightSyncPayload.STREAM_CODEC);
 
         WeightChallenge.bootstrap(
                 new WeightPlatform.WeightAccess() {

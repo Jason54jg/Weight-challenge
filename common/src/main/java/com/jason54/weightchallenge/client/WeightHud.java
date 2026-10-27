@@ -5,7 +5,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
 /**
- * Affichage HUD (action bar) du poids en temps réel.
+ * Real-time weight HUD (action bar).
  */
 public final class WeightHud {
     private static double clientWeightKg = WeightConfig.get().defaultWeightKg;
@@ -23,10 +23,14 @@ public final class WeightHud {
         }
         double goal = config.goalWeightKg;
         String mode = config.hudMode == null ? "ACTION_BAR" : config.hudMode.toUpperCase();
-        Component message = Component.literal(String.format("Poids : %.1f kg | Objectif : %.0f kg", clientWeightKg, goal));
+        Component message = Component.translatable(
+                "weightchallenge.hud.weight",
+                String.format("%.1f", clientWeightKg),
+                String.format("%.0f", goal)
+        );
         if ("OVERLAY".equals(mode)) {
             message = Component.literal("§6§l").append(message);
         }
-        player.displayClientMessage(message, true);
+        ClientMessageCompat.showActionBar(player, message);
     }
 }

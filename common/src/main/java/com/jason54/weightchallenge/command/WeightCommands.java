@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * Commandes admin : /weight set|add|reset|get
+ * Admin commands: /weight set|add|reset|get
  */
 public final class WeightCommands {
     private WeightCommands() {}
@@ -32,8 +32,10 @@ public final class WeightCommands {
                                                                             double kg = WeightConfig.get().clampWeight(DoubleArgumentType.getDouble(ctx, "kg"));
                                                                             WeightPlatform.setWeight(target, kg, true);
                                                                             WeightLogic.applyEffects(target);
+                                                                            String name = target.getName().getString();
+                                                                            String formatted = String.format("%.1f", kg);
                                                                             ctx.getSource().sendSuccess(
-                                                                                    () -> Component.literal("Poids de " + target.getName().getString() + " fixe a " + String.format("%.1f", kg) + " kg"),
+                                                                                    () -> Component.translatable("weightchallenge.command.set", name, formatted),
                                                                                     true
                                                                             );
                                                                             return 1;
@@ -53,8 +55,10 @@ public final class WeightCommands {
                                                                             double next = WeightConfig.get().clampWeight(WeightPlatform.getWeight(target) + delta);
                                                                             WeightPlatform.setWeight(target, next, true);
                                                                             WeightLogic.applyEffects(target);
+                                                                            String name = target.getName().getString();
+                                                                            String formatted = String.format("%.1f", next);
                                                                             ctx.getSource().sendSuccess(
-                                                                                    () -> Component.literal("Poids de " + target.getName().getString() + " : " + String.format("%.1f", next) + " kg"),
+                                                                                    () -> Component.translatable("weightchallenge.command.add", name, formatted),
                                                                                     true
                                                                             );
                                                                             return 1;
@@ -69,8 +73,9 @@ public final class WeightCommands {
                                                         .executes(ctx -> {
                                                             ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
                                                             WeightLogic.resetWeight(target);
+                                                            String name = target.getName().getString();
                                                             ctx.getSource().sendSuccess(
-                                                                    () -> Component.literal("Poids de " + target.getName().getString() + " reinitialise."),
+                                                                    () -> Component.translatable("weightchallenge.command.reset", name),
                                                                     true
                                                             );
                                                             return 1;
@@ -90,8 +95,11 @@ public final class WeightCommands {
 
     private static int sendGet(CommandSourceStack source, ServerPlayer target) {
         double weight = WeightPlatform.getWeight(target);
+        String name = target.getName().getString();
+        String formattedWeight = String.format("%.1f", weight);
+        String formattedGoal = String.format("%.0f", WeightConfig.get().goalWeightKg);
         source.sendSuccess(
-                () -> Component.literal(target.getName().getString() + " : " + String.format("%.1f", weight) + " kg (objectif " + String.format("%.0f", WeightConfig.get().goalWeightKg) + " kg)"),
+                () -> Component.translatable("weightchallenge.command.get", name, formattedWeight, formattedGoal),
                 false
         );
         return 1;

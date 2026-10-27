@@ -14,7 +14,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -96,8 +96,8 @@ public class WeightChallengeNeoForge {
         }
     }
 
-    private void onBlockBreak(BlockEvent.BreakEvent event) {
-        if (event.getPlayer() instanceof ServerPlayer serverPlayer) {
+    private void onBlockBreak(BlockDropsEvent event) {
+        if (event.getBreaker() instanceof ServerPlayer serverPlayer) {
             WeightLogic.onBlockMined(serverPlayer);
         }
     }

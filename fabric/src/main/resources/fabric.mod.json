@@ -9,6 +9,7 @@
   ],
   "contact": {},
   "license": "${license}",
+  "icon": "assets/weightchallenge/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
