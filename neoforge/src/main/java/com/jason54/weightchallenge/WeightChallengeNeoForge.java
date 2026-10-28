@@ -12,9 +12,10 @@ import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -22,6 +23,8 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
+import java.lang.reflect.Method;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Mod(Constants.MOD_ID)
@@ -64,7 +67,46 @@ public class WeightChallengeNeoForge {
         NeoForge.EVENT_BUS.addListener(this::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(this::onPlayerLogin);
         NeoForge.EVENT_BUS.addListener(this::onAttack);
-        NeoForge.EVENT_BUS.addListener(this::onBlockBreak);
+        registerBlockBreakListener();
+    }
+
+    /**
+     * 1.21.11: {@code BlockEvent.BreakEvent}; 26.x: {@code BreakBlockEvent}.
+     * Avoids {@code BlockDropsEvent}, which skips creative / no-drop breaks.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void registerBlockBreakListener() {
+        Class<? extends Event> eventClass;
+        try {
+            eventClass = (Class<? extends Event>) Class.forName(
+                    "net.neoforged.neoforge.event.level.block.BreakBlockEvent");
+        } catch (ClassNotFoundException ignored) {
+            try {
+                eventClass = (Class<? extends Event>) Class.forName(
+                        "net.neoforged.neoforge.event.level.BlockEvent$BreakEvent");
+            } catch (ClassNotFoundException e) {
+                throw new IllegalStateException("No NeoForge block-break event found", e);
+            }
+        }
+
+        Method getPlayer;
+        try {
+            getPlayer = eventClass.getMethod("getPlayer");
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException("Block-break event missing getPlayer()", e);
+        }
+
+        Consumer handler = event -> {
+            try {
+                Object player = getPlayer.invoke(event);
+                if (player instanceof ServerPlayer serverPlayer && !serverPlayer.level().isClientSide()) {
+                    WeightLogic.onBlockMined(serverPlayer);
+                }
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException("Failed to handle block break", e);
+            }
+        };
+        NeoForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, eventClass, handler);
     }
 
     private void registerNetworking(RegisterPayloadHandlersEvent event) {
@@ -93,12 +135,6 @@ public class WeightChallengeNeoForge {
     private void onAttack(AttackEntityEvent event) {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             WeightLogic.onAttack(serverPlayer);
-        }
-    }
-
-    private void onBlockBreak(BlockDropsEvent event) {
-        if (event.getBreaker() instanceof ServerPlayer serverPlayer) {
-            WeightLogic.onBlockMined(serverPlayer);
         }
     }
 

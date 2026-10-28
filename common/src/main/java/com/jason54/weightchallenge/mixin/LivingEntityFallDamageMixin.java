@@ -10,8 +10,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityFallDamageMixin {
-    @Inject(method = "calculateFallDamage", at = @At("RETURN"), cancellable = true)
-    private void weightchallenge$heavyFall(float fallDistance, float damageMultiplier, CallbackInfoReturnable<Float> cir) {
+    /**
+     * 1.21.11+ / 26.x: {@code calculateFallDamage(double, float) -> int}.
+     */
+    @Inject(method = "calculateFallDamage(DF)I", at = @At("RETURN"), cancellable = true)
+    private void weightchallenge$heavyFall(double fallDistance, float damageMultiplier, CallbackInfoReturnable<Integer> cir) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof ServerPlayer player) {
             cir.setReturnValue(WeightLogic.modifyFallDamage(player, cir.getReturnValue()));

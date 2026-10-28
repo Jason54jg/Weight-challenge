@@ -1,9 +1,4 @@
-plugins {
-    id 'multiloader-loader'
-}
-
 def unobfuscated = rootProject.gradle.ext.unobfuscated as boolean
-apply plugin: (rootProject.gradle.ext.loomPlugin as String)
 
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"

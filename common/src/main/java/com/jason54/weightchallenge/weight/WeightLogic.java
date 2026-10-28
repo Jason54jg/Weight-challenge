@@ -101,14 +101,14 @@ public final class WeightLogic {
         adjustWeight(player, gain);
     }
 
-    public static float modifyFallDamage(ServerPlayer player, float damage) {
+    public static int modifyFallDamage(ServerPlayer player, int damage) {
         WeightConfig config = WeightConfig.get();
         if (!config.enableHeavyFallBonus) {
             return damage;
         }
         double weight = WeightPlatform.getWeight(player);
         if (weight >= config.heavyFallThresholdKg) {
-            return damage * (float) config.heavyFallDamageMultiplier;
+            return Math.round(damage * (float) config.heavyFallDamageMultiplier);
         }
         return damage;
     }

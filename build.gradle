@@ -1,6 +1,4 @@
 plugins {
-    // Versions resolved in settings.gradle from versions/<mcVersion>.properties
-    id 'fabric-loom' apply false
-    id 'net.fabricmc.fabric-loom' apply false
+    // Version resolved in settings.gradle from versions/<mcVersion>.properties
     id 'net.neoforged.moddev' apply false
 }

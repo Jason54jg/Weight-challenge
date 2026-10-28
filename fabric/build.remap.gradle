@@ -1,0 +1,6 @@
+plugins {
+    id 'multiloader-loader'
+    id 'fabric-loom'
+}
+
+apply from: 'fabric-body.gradle'
